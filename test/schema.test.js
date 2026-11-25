@@ -3457,6 +3457,17 @@ describe('schema', function() {
     assert.equal(schema._getSchema('child.testMap.foo.bar').instance, 'Mixed');
   });
 
+  it('_getSchema finds a nested primitive array cell after a positional path is cached (gh-16756)', function() {
+    const schema = new Schema({
+      outer: [new Schema({ elements: [new Schema({ grid: [[Number]] })] })]
+    });
+    const path = 'outer.$[o].elements.$[e].grid.1.1';
+
+    assert.equal(schema._getSchema(path).instance, 'Number');
+    schema.path('outer.0.elements.0.grid');
+    assert.equal(schema._getSchema(path).instance, 'Number');
+  });
+
   it('should not allow to create a path with primitive values (gh-7558)', () => {
     assert.throws(() => {
       new Schema({
